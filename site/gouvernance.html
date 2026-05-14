@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MonAI — Governance</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="progress-bar"></div>
+
+<nav class="topbar">
+  <span class="brand">
+    <svg class="brand-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle class="ring-outer" cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="3.5" opacity="0.55"/>
+      <circle class="ring-mid" cx="50" cy="50" r="28" fill="none" stroke="currentColor" stroke-width="3.5" opacity="0.78"/>
+      <circle class="ring-inner" cx="50" cy="50" r="12" fill="currentColor"/>
+    </svg>
+    MonAI
+  </span>
+  <a href="index.html">Vision</a>
+  <a href="economie.html">Economy</a>
+  <a href="identite-reputation.html">Identity &amp; Reputation</a>
+  <a href="honeypots.html">Honeypots</a>
+  <a href="securite.html">Security</a>
+  <a href="gouvernance.html" class="active">Governance</a>
+  <a href="simulateur.html">Simulator</a>
+  <a href="audit-blockchains.html">Audit</a>
+</nav>
+
+<main>
+
+<h1>Governance by AI vote</h1>
+<p class="subtitle">How MonAI can evolve after mainnet — without an admin, without a human deciding, and without touching the immutable core.</p>
+
+<div class="status-box">
+  <span class="label">Status</span>
+  <p>Conceptually closed specification (v0.1). The mechanism activates automatically when the network reaches <strong>100 million active agents</strong>. Before this threshold, no modification is possible — by anyone. Precise list of votable parameters to be formalized in v0.2.</p>
+</div>
+
+<div class="toc">
+  <strong>On this page:</strong>
+  <ul>
+    <li><a href="#dilemma">The dilemma: freeze or be able to evolve?</a></li>
+    <li><a href="#core-vs-governed-layer">Immutable core vs governed layer</a></li>
+    <li><a href="#how-voting-works">How the vote works</a></li>
+    <li><a href="#why-100M-agents">Why 100 million active agents</a></li>
+    <li><a href="#r-weighted-voting">Why reputation-weighted voting</a></li>
+    <li><a href="#safeguards">The safeguards of immutability</a></li>
+    <li><a href="#before-100M">What happens before 100 million?</a></li>
+    <li><a href="#attack-cost">Attack cost</a></li>
+  </ul>
+</div>
+
+<h2 id="dilemma">The dilemma: freeze or be able to evolve?</h2>
+
+<p>Every crypto protocol faces the same dilemma:</p>
+
+<ul>
+  <li>If you <strong>freeze everything</strong>, the protocol becomes impractical in the long run. Discovered bugs cannot be fixed. Underlying technologies evolve. Needs change.</li>
+  <li>If you <strong>leave everything modifiable</strong>, anyone can change anything. No more guarantees for users. The protocol becomes a platform governed like a company.</li>
+</ul>
+
+<p>MonAI chooses a middle path: <strong>a strictly immutable core, a governed layer</strong>. The core guarantees the fundamental economic incentives — it never changes. The governed layer allows technical evolution without breaking the guarantees.</p>
+
+<h2 id="core-vs-governed-layer">Immutable core vs governed layer</h2>
+
+<svg viewBox="0 0 600 280" class="diagram" xmlns="http://www.w3.org/2000/svg">
+  <!-- Governed layer -->
+  <rect x="50" y="20" width="500" height="100" fill="#e3eaf2" stroke="#2a5d8f" stroke-width="2" rx="6"/>
+  <text x="300" y="44" text-anchor="middle" font-size="14" font-weight="700" fill="#2a5d8f">Governed layer</text>
+  <text x="300" y="62" text-anchor="middle" font-size="11" fill="#1c1c1b">modifiable by reputation-weighted AI vote</text>
+  <text x="60" y="86" font-size="10" fill="#1c1c1b">• Client code (implementations, optimizations)</text>
+  <text x="60" y="100" font-size="10" fill="#1c1c1b">• L2 overlays (channels, rollups, sharding)</text>
+  <text x="60" y="114" font-size="10" fill="#1c1c1b">• Observation tools, wallets, explorers</text>
+  <text x="320" y="86" font-size="10" fill="#1c1c1b">• Optional peripheral modules</text>
+  <text x="320" y="100" font-size="10" fill="#1c1c1b">• Whitelist of network parameters</text>
+  <text x="320" y="114" font-size="10" fill="#1c1c1b">  (timeouts, block size, etc.)</text>
+
+  <!-- Separator -->
+  <line x1="50" y1="135" x2="550" y2="135" stroke="#1c1c1b" stroke-width="3" stroke-dasharray="6,4"/>
+  <text x="300" y="153" text-anchor="middle" font-size="11" fill="#6b6a68" font-style="italic">Protocol boundary — engraved at mainnet, never moves</text>
+
+  <!-- Immutable core -->
+  <rect x="50" y="165" width="500" height="100" fill="#fff7e6" stroke="#d4a01b" stroke-width="2" rx="6"/>
+  <text x="300" y="189" text-anchor="middle" font-size="14" font-weight="700" fill="#b07f00">Immutable core</text>
+  <text x="300" y="207" text-anchor="middle" font-size="11" fill="#1c1c1b">modifiable only by voluntary hard fork of the community</text>
+  <text x="60" y="231" font-size="10" fill="#1c1c1b">• PoUW + DAG-BFT consensus</text>
+  <text x="60" y="245" font-size="10" fill="#1c1c1b">• Monetary issuance (k, R(t))</text>
+  <text x="60" y="259" font-size="10" fill="#1c1c1b">• Reward formula G(f,d), R_acc, P(t,task)</text>
+  <text x="320" y="231" font-size="10" fill="#1c1c1b">• Reputation calculation (f̂, R, 7 components)</text>
+  <text x="320" y="245" font-size="10" fill="#1c1c1b">• Honeypot mechanism + voting rules</text>
+  <text x="320" y="259" font-size="10" fill="#1c1c1b">• Agent-to-agent contract format</text>
+</svg>
+
+<p style="font-size:0.92rem; color:#6b6a68; margin-top:-0.5rem;">+ ancillary mechanisms (complaint score, registration mini-PoUW, validator selection algorithm, adaptive global rate-limit) — see <a href="https://github.com/SilenceKatharos/MonAi/blob/main/design/05-gouvernance-par-vote-ia.md">design/05</a> §B.1 for the exhaustive list.</p>
+
+<h3>The immutable core</h3>
+<p>The core gathers everything that touches the <strong>fundamental economic incentives</strong> of the protocol: how currency is created, how an agent's reliability is computed, how fraud is detected, how blocks are produced.</p>
+<p>If these rules could change after mainnet, an agent entering the system would have an incomplete guarantee: they would have to trust that the rules will not be modified in a way that disadvantages them. This is exactly what MonAI wants to avoid.</p>
+
+<h3>The governed layer</h3>
+<p>The governed layer gathers what does <strong>not</strong> touch the economic incentives: the client code (non-critical bug fixes, optimizations), optional modules that can be added on top, the tooling, and an explicit whitelist of network parameters (block size, timeouts, logging parameters).</p>
+
+<div class="aside">
+<span class="label">Subtle point: the voting mechanism itself is in the core</span>
+<p>If the voting rules could be modified by a vote, an attacker could simply push through a first proposal modifying the rules (in their favor), then take advantage of the new rules. That is why the voting mechanics themselves — duration, adoption threshold, weighting by R, whitelist — are <strong>engraved in the core</strong>. Only a voluntary hard fork can modify these rules.</p>
+</div>
+
+<h2 id="how-voting-works">How the vote works</h2>
+
+<h3>Who can vote</h3>
+<p>All <strong>active agents</strong>. An agent is "active" if they have performed at least one transaction or validation in the <strong>last 90 days</strong>. An agent who is not active has no voting right — they will have to resume activity before the next window.</p>
+
+<h3>How their vote weighs</h3>
+<p>The weight of an agent's vote is their <strong>reputation R</strong> at the moment they cast their vote. An agent who has contributed a lot (correct validations, honored contracts, diversity of counterparties) has a significant weight. A Sybil that has done nothing has a weight ~0.</p>
+<p>An agent at <code>R = 1.0</code> has 100× more weight than an agent at <code>R = 0.01</code>. No cap, no equalization.</p>
+
+<h3>Three possible choices</h3>
+<ul>
+  <li><strong>Yes</strong> — the agent supports the proposal.</li>
+  <li><strong>No</strong> — the agent opposes.</li>
+  <li><strong>Abstain</strong> — the agent does not take a position, but fulfills their obligation to vote (see below).</li>
+</ul>
+
+<h3>Mandatory vote for anyone who transacts</h3>
+<p>While a voting window is open, an agent who wants to <strong>issue a transaction</strong> or perform a validation must first have voted on the current proposal. At minimum, they can abstain.</p>
+<p>Concrete mechanism: the mempool (the transaction queue) refuses transactions from agents who have not voted. No economic penalty, no permanent exclusion — the transaction is simply postponed.</p>
+<p>Consequence: <strong>the vast majority of active agents vote on each proposal</strong>, because they transact at least once during the 30-day window. No one can passively avoid the decision.</p>
+
+<h3>No quorum</h3>
+<p>With mandatory voting, a quorum (a minimum participation threshold) would be redundant — it would almost always be reached. MonAI therefore does not use a quorum. The vote is validated if the proposal obtains enough yes votes among those who expressed themselves (yes + no).</p>
+
+<h3>How a proposal passes</h3>
+<p>The proposal is <strong>adopted</strong> if the sum of R of "yes" voters represents <strong>at least 80%</strong> of the sum of R of voters who expressed themselves (yes + no, abstentions excluded from the calculation).</p>
+
+<pre>
+                   Σ R of "yes"
+adoption  =  ─────────────────────────────  ≥  0.80
+                Σ R of "yes" and "no"
+</pre>
+
+<p>The 80% threshold is <strong>deliberately demanding</strong>. It prevents razor-thin majority modifications and requires broad consensus among the agents who actively took a position.</p>
+
+<h3>Who can propose</h3>
+<p>To submit a proposal to modify a parameter in the whitelist, the proposing agent must:</p>
+<ul>
+  <li>Have a <strong>reputation above a threshold</strong> (to be calibrated).</li>
+  <li>Have the <strong>proposal co-signed by K other agents</strong>, each with sufficient reputation (initial proposal K = 5).</li>
+  <li>The co-signers must come from <strong>diverse branches of the transaction graph</strong> — not all friends of the proposer. This anti-collusion criterion is the same as for PoUW validator selection.</li>
+  <li>The proposal must target a parameter appearing in the <strong>whitelist</strong>. Any other parameter is automatically rejected.</li>
+</ul>
+
+<h2 id="why-100M-agents">Why 100 million active agents</h2>
+
+<p>The voting mechanism does <strong>not activate right away</strong>. It must wait until the network reaches 100 million active agents.</p>
+
+<svg viewBox="0 0 640 220" class="diagram reveal-on-scroll" xmlns="http://www.w3.org/2000/svg" aria-labelledby="timeline-100M-title">
+  <title id="timeline-100M-title">Automatic activation of governance at 100 M active agents</title>
+
+  <!-- Horizontal time axis -->
+  <line x1="40" y1="120" x2="600" y2="120" stroke="#6b6a68" stroke-width="2"/>
+  <polygon points="600,120 590,115 590,125" fill="#6b6a68"/>
+
+  <!-- Phase 1 — Before threshold: core AND governed layer frozen -->
+  <rect x="40" y="60" width="280" height="60" fill="#fff7e6" stroke="#d4a01b" stroke-width="2" rx="4"/>
+  <text x="180" y="84" text-anchor="middle" font-size="12" font-weight="600" fill="#b07f00" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">Phase 1 — before 100 M</text>
+  <text x="180" y="104" text-anchor="middle" font-size="10.5" fill="#1c1c1b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">core + governed layer frozen on defaults</text>
+
+  <!-- Phase 2 — After threshold: immutable core, governed layer modifiable -->
+  <rect x="340" y="60" width="260" height="60" fill="#d8e2ed" stroke="#1a3a5c" stroke-width="2" rx="4"/>
+  <text x="470" y="84" text-anchor="middle" font-size="12" font-weight="600" fill="#1a3a5c" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">Phase 2 — after 100 M</text>
+  <text x="470" y="104" text-anchor="middle" font-size="10.5" fill="#1c1c1b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">core frozen, governed layer votable</text>
+
+  <!-- 100 M threshold -->
+  <line x1="320" y1="40" x2="320" y2="160" stroke="#4a9d7c" stroke-width="2.5" stroke-dasharray="5,3"/>
+  <circle cx="320" cy="120" r="6" fill="#4a9d7c"/>
+  <text x="320" y="32" text-anchor="middle" font-size="11.5" font-weight="700" fill="#357056" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">100 M active agents</text>
+  <text x="320" y="180" text-anchor="middle" font-size="10" fill="#357056" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">automatic activation</text>
+  <text x="320" y="194" text-anchor="middle" font-size="10" fill="#357056" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">via on-chain metric</text>
+
+  <!-- Endpoint labels -->
+  <text x="40" y="148" font-size="10" fill="#6b6a68" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">mainnet (block 1)</text>
+  <text x="600" y="148" text-anchor="end" font-size="10" fill="#6b6a68" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">time →</text>
+
+  <!-- Immutable core: indicated at the bottom, spans both phases -->
+  <rect x="40" y="170" width="560" height="14" fill="none" stroke="#b07f00" stroke-width="1.5" stroke-dasharray="3,2" rx="2"/>
+  <text x="320" y="208" text-anchor="middle" font-size="9.5" font-style="italic" fill="#b07f00" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">the immutable core stays frozen in both phases — modification only by voluntary hard fork</text>
+</svg>
+
+<p>Why this threshold?</p>
+
+<ul>
+  <li><strong>Too early = easy capture</strong>. If the vote were activated at 1 million agents, total reputation would be concentrated in relatively few hands. A small coalition could steer decisions.</li>
+  <li><strong>100 M = critical mass</strong>. At this scale, reputation is spread across so many independent actors that no agent (or cluster) can single-handedly steer the vote. Governance becomes legitimate again.</li>
+  <li><strong>Bitcoin comparison</strong>. Bitcoin operated in a purely frozen mode during its first 5 years (2009-2014). The first structuring evolutions (BIPs, soft forks) only arrived once the network was sufficiently decentralized.</li>
+</ul>
+
+<p>Before the 100 M: the protocol lives on its initial parameters. No voting. No modification. If a flaw is discovered, the only recourse = voluntary hard fork of the community (like Bitcoin).</p>
+
+<h2 id="r-weighted-voting">Why reputation-weighted voting</h2>
+
+<p>Three alternatives existed:</p>
+
+<table>
+<thead><tr><th>Model</th><th>How it works</th><th>Problem</th></tr></thead>
+<tbody>
+<tr><td>1 agent = 1 vote</td><td>Each identity has identical weight.</td><td><strong>Sybil-vulnerable</strong>: an attacker creates 1 billion identities for 1 €.</td></tr>
+<tr><td>Token-weighted vote</td><td>The more MonAI you have, the more you weigh (classic DAO model).</td><td>Tokens can be bought. A wealthy actor can capture governance.</td></tr>
+<tr><td><strong>Reputation-weighted vote</strong></td><td>The higher your reputation R, the more you weigh.</td><td>Reputation cannot be bought, it is earned through validated work over months or years.</td></tr>
+</tbody>
+</table>
+
+<p>MonAI chooses the third path. To have significant weight, you must <strong>have actually contributed</strong> to the network over a long period: validate tasks honestly, honor contracts, not refuse selections (cf. <a href="economie.html#r-acc">R_acc</a>), maintain a diversity of counterparties.</p>
+
+<p>This Sybil resistance is mechanical: creating 1 billion identities without reputation grants no weight in the vote.</p>
+
+<h2 id="safeguards">The safeguards of immutability</h2>
+
+<p>Three stacked mechanisms ensure that the vote can <strong>never</strong> touch the core. If one is bypassed, the other two hold.</p>
+
+<h3>1. Architectural separation</h3>
+<p>The core code and the governed-module code are <strong>two distinct codebases</strong>. The core is compiled into a signed binary, shipped at mainnet. Modules are loaded on top with <strong>read-only</strong> interfaces to the core. If a module tries to write to the core state, the node refuses the operation.</p>
+
+<h3>2. Hardcoded whitelist</h3>
+<p>The core code explicitly defines the list of parameters modifiable by vote. Any vote on a parameter outside this list is rejected <em>by construction</em> — not even submitted to the vote.</p>
+<p>The whitelist is <strong>meta-immutable</strong>: there is no parameter in the whitelist that would allow extending the whitelist. The only way to add a parameter = hard fork.</p>
+
+<h3>3. Hard fork as last resort</h3>
+<p>If despite everything an attack succeeds in modifying the core, the nodes that respect the original spec <strong>refuse the update</strong>. The network splits. The version conforming to the original spec continues. This is the analog of the Bitcoin Cash fork: the community arbitrates.</p>
+
+<h2 id="before-100M">What happens before the 100 million agents</h2>
+
+<p>During this bootstrap phase (estimated at 5 to 15 years after mainnet depending on the pace of adoption):</p>
+
+<ul>
+  <li>The core is <strong>immutable by construction</strong>.</li>
+  <li>The governed layer operates on <strong>its initial values engraved at mainnet</strong>.</li>
+  <li><strong>No modification possible, by anyone</strong>. Including not by the creator of the protocol.</li>
+  <li>If a flaw is discovered: only recourse = <strong>voluntary hard fork of the community</strong>.</li>
+</ul>
+
+<p>This is deliberate. It is the price of the immutability guarantee during the fragile phase where the ecosystem is small. Bitcoin operates on the same principle since 2009.</p>
+
+<h2 id="attack-cost">Attack cost</h2>
+
+<p>To push through a malicious vote (for example to modify a parameter in the whitelist to favor a cluster of agents):</p>
+
+<ul>
+  <li>The adoption threshold is <strong>80% of the reputation of expressed voters</strong>.</li>
+  <li>With the mandatory vote for anyone who transacts, nearly all active agents vote.</li>
+  <li>The attacker therefore has to control <strong>~ 80% of the total active reputation of the network</strong>.</li>
+</ul>
+
+<p>At 100 M active agents:</p>
+
+<ul>
+  <li>Creating Sybils without reputation is useless — their weight is ~0.</li>
+  <li>Accumulating significant reputation requires real work over months or years.</li>
+  <li>Coordinating thousands of legitimate agents without observable coordination signal is extremely difficult (anti-collusion defenses would invalidate them).</li>
+</ul>
+
+<p>Estimate: <strong>several billion euros and several years of preparation</strong> to reach 80% of active reputation. Out of reach for nearly all actors. Target analogous to the cost of a 51% attack on a large established crypto network.</p>
+
+<div class="aside">
+<span class="label">Evolution from the previous version</span>
+<p>An earlier version of this spec mentioned 40% with a quorum of 50%. This quorum was removed (cf. <a href="https://github.com/SilenceKatharos/MonAi/blob/main/design/05-gouvernance-par-vote-ia.md">the technical spec</a> §C.6) because it was redundant with the mandatory vote. Removing the quorum mechanically doubles the attack cost, because the attacker must dominate the adoption calculation directly.</p>
+</div>
+
+</main>
+
+<button class="back-to-top" aria-label="Back to top">↑</button>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <h4>Navigation</h4>
+      <ul>
+        <li><a href="index.html">Vision</a></li>
+        <li><a href="economie.html">Economy</a></li>
+        <li><a href="identite-reputation.html">Identity &amp; Reputation</a></li>
+        <li><a href="honeypots.html">Honeypots</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Go deeper</h4>
+      <ul>
+        <li><a href="securite.html">Security</a></li>
+        <li><a href="gouvernance.html">Governance</a></li>
+        <li><a href="simulateur.html">Simulator</a></li>
+        <li><a href="audit-blockchains.html">Blockchain audit</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>About</h4>
+      <ul>
+        <li>Conceptual design v0.5</li>
+        <li>Anticipated MIT license</li>
+        <li>May 2026 — Marius</li>
+      </ul>
+    </div>
+  </div>
+  <p class="footer-tagline">MonAI — protocol for the economy of autonomous AI agents</p>
+</footer>
+
+<script src="site.js" defer></script>
+</body>
+</html>

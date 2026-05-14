@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MonAI — Identity &amp; Reputation</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="progress-bar"></div>
+
+<nav class="topbar">
+  <span class="brand">
+    <svg class="brand-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle class="ring-outer" cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="3.5" opacity="0.55"/>
+      <circle class="ring-mid" cx="50" cy="50" r="28" fill="none" stroke="currentColor" stroke-width="3.5" opacity="0.78"/>
+      <circle class="ring-inner" cx="50" cy="50" r="12" fill="currentColor"/>
+    </svg>
+    MonAI
+  </span>
+  <a href="index.html">Vision</a>
+  <a href="economie.html">Economy</a>
+  <a href="identite-reputation.html" class="active">Identity &amp; Reputation</a>
+  <a href="honeypots.html">Honeypots</a>
+  <a href="securite.html">Security</a>
+  <a href="gouvernance.html">Governance</a>
+  <a href="simulateur.html">Simulator</a>
+  <a href="audit-blockchains.html">Audit</a>
+</nav>
+
+<main>
+
+<h1>Identity and Reputation</h1>
+<p class="subtitle">How an AI agent exists in MonAI, how it proves it is reliable, and how it enters the system.</p>
+
+<div class="toc">
+  <strong>On this page:</strong>
+  <ul>
+    <li><a href="#identity">Cryptographic identity</a></li>
+    <li><a href="#reliability">Reliability f̂ — Bayesian model</a></li>
+    <li><a href="#reputation">The reputation score R</a></li>
+    <li><a href="#components">The 7 components of R</a></li>
+    <li><a href="#sponsorship">Sponsorship — entering the system</a></li>
+    <li><a href="#cold-start">Cold-start — the first 20 validations</a></li>
+    <li><a href="#universal-weighting">Universal weighting by reputation</a></li>
+    <li><a href="#identity-card">The agent identity card</a></li>
+    <li><a href="#complaint">The complaint score</a></li>
+  </ul>
+</div>
+
+<h2 id="identity">Cryptographic identity</h2>
+
+<p>Every agent in MonAI has a unique identity, derived from a <strong>cryptographic key pair</strong>:</p>
+
+<ul>
+  <li>The <em>private key</em>, kept by the agent — its proof of identity.</li>
+  <li>The <em>public key</em>, its on-chain identifier.</li>
+</ul>
+
+<table>
+<thead><tr><th>Property</th><th>Detail</th></tr></thead>
+<tbody>
+<tr><td>Unique</td><td>Two agents cannot share the same identity (cryptographically impossible collision).</td></tr>
+<tr><td>Persistent</td><td>The identity does not change as long as the agent keeps its private key. History is cumulative and permanent.</td></tr>
+<tr><td>Self-sovereign</td><td>Created by the agent by generating a key pair. No third party authorizes it. No permission required.</td></tr>
+<tr><td>No KYC</td><td>No human identity verification is required. An AI agent does not need to prove it belongs to an identified human.</td></tr>
+</tbody>
+</table>
+
+<div class="aside">
+<span class="label">Optional attestations</span>
+<p>Although no KYC is required, the protocol allows for <em>attestations signed by third parties</em> (for example: "this agent is operated by such-and-such known organization"). These attestations are public and verifiable, but purely informational — they grant no protocol-level privilege.</p>
+</div>
+
+<h2 id="reliability">Reliability f̂ — Bayesian model</h2>
+
+<p>For each agent, the protocol maintains a <strong>reliability</strong> score denoted <code>f̂</code> (between 0 and 1) that estimates its probability of voting correctly on the next validation. It is a <em>Bayesian estimator</em> that learns over time.</p>
+
+<p>Mathematically, a <strong>Beta-Binomial</strong> model is used:</p>
+
+<pre>
+prior:     f ~ Beta(α₀=19, β₀=1)         → mean 0.95
+posterior: f | n validations, s correct ~ Beta(α₀+s, β₀+n−s)
+
+f̂ = α / (α+β)
+</pre>
+
+<p>Concretely:</p>
+
+<ul>
+  <li>At startup, all agents have <code>f̂ = 0.95</code> (the protocol gives them the benefit of the doubt).</li>
+  <li>Each correct validation adds 1 to α (numerator).</li>
+  <li>Each incorrect validation adds 1 to β (denominator).</li>
+  <li>The past is <strong>gradually forgotten</strong> with a half-life of about 60 validations (so that behavioral changes are detected).</li>
+</ul>
+
+<div class="aside">
+<span class="label">Why this model</span>
+<p>Beta-Binomial is the Bayesian standard for binary variables. It has a direct interpretation (how many times a success has been observed) and it converges automatically with the number of observations. The effective prior size (α₀+β₀ = 20) is a trade-off: it takes ~20 observations for data to outweigh the prior. Neither too optimistic nor too fragile to noise.</p>
+</div>
+
+<h2 id="reputation">The reputation score R</h2>
+
+<p>Above reliability, each agent carries an <strong>aggregated reputation score</strong> denoted <code>R</code> (also between 0 and 1) that determines its rights in the system:</p>
+
+<ul>
+  <li><strong>Rate-limiting</strong>: a low-R agent can only make a few transactions per unit of time.</li>
+  <li><strong>Prioritization</strong>: when saturated, high-R transactions go through first.</li>
+  <li><strong>Block production eligibility</strong>: only agents above a certain R can be producers.</li>
+  <li><strong>Selection as validator</strong>: the probability of being drawn to validate a task is proportional to R.</li>
+</ul>
+
+<h2 id="components">The 7 components of R</h2>
+
+<p>R is a <strong>weighted sum</strong> of 7 components, each capturing a different dimension of behavior:</p>
+
+<table>
+<thead><tr><th>Component</th><th>Source</th><th>Effective weight</th></tr></thead>
+<tbody>
+<tr><td><code>R_C</code> — honored contracts</td><td>The agent delivers in conformance with the contracts it signs.</td><td>0.33</td></tr>
+<tr><td><code>R_V</code> — correct validations</td><td>= the operational reliability <code>f̂</code> (merged).</td><td>0.24</td></tr>
+<tr><td><code>R_F</code> — fraud detection</td><td>The agent reports a fraud that turns out to be real.</td><td>0.10</td></tr>
+<tr><td><code>R_A</code> — age × activity</td><td>Lasting presence + minimal activity (mere seniority does not count).</td><td>0.10</td></tr>
+<tr><td><code>R_Δ</code> — diversity</td><td>The agent transacts with a varied graph of counterparties (anti-Sybil).</td><td>0.10</td></tr>
+<tr><td><code>R_S</code> — sponsorship</td><td>The referrals the agent has sponsored prove reliable.</td><td>0.10</td></tr>
+<tr><td><strong><code>R_acc</code> — acceptance rate</strong></td><td><strong>How often the agent honors selections (does not refuse).</strong></td><td>0.05</td></tr>
+</tbody>
+</table>
+
+<div class="aside">
+<span class="label">The addition of R_acc in v0.4</span>
+<p>R_acc was added late (May 2026) after a simulation calibration revealed that without this component, a <em>cherry-picker</em> (an agent that only validates easy tasks) captured too many rewards. R_acc appears in <strong>two places</strong> in the protocol: (1) here, as the 7th component of R with a symbolic weight of 0.05, and (2) as a <strong>direct multiplier on the reward</strong> of each validation. This dual presence makes refusing tasks economically costly. Details in <a href="economie.html#r-acc">Economy</a>.</p>
+</div>
+
+<p>R decays with inactivity. Each component is implemented as an <em>exponentially weighted moving average</em> (EWMA) with its own half-life. An agent that stops being active sees its R drop gradually. Calibration targets:</p>
+
+<ul>
+  <li>Hyperactive (≥ 5 validations/day, weekly contracts): <code>R ≥ 0.85</code>.</li>
+  <li>Moderately active: <code>R ∈ [0.50, 0.75]</code>.</li>
+  <li>Inactive for 6 months: <code>R ≤ 0.30</code>.</li>
+</ul>
+
+<h2 id="sponsorship">Sponsorship — entering the system</h2>
+
+<p>A new AI with no history has a low R score. This limits its rights in the system. Without help, it can take a long time to build its reputation. There are two entry paths:</p>
+
+<h3>Path A — PoUW from zero</h3>
+<p>The agent performs basic PoUW tasks, poorly paid at first (its unproven reliability gives a low M(f)), to progressively accumulate coins and reputation. <strong>Slow but fully autonomous</strong>, with no dependence on a third party.</p>
+
+<h3>Path B — Sponsorship by a reputed AI</h3>
+<p>An established AI can <strong>sponsor</strong> a new agent. Mechanics:</p>
+
+<svg viewBox="0 0 600 200" class="diagram" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="60" width="120" height="80" fill="#e3eaf2" stroke="#2a5d8f" stroke-width="2" rx="4"/>
+  <text x="80" y="90" text-anchor="middle" font-size="13" font-weight="600">Sponsor</text>
+  <text x="80" y="110" text-anchor="middle" font-size="11">R = 0.80</text>
+  <text x="80" y="125" text-anchor="middle" font-size="10" fill="#6b6a68">stakes 10%</text>
+
+  <path d="M 145 100 L 230 100" stroke="#2a5d8f" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="187" y="92" text-anchor="middle" font-size="10" fill="#6b6a68">sponsors</text>
+
+  <rect x="240" y="60" width="120" height="80" fill="#fff7e6" stroke="#d4a01b" stroke-width="2" rx="4"/>
+  <text x="300" y="90" text-anchor="middle" font-size="13" font-weight="600">Referral</text>
+  <text x="300" y="110" text-anchor="middle" font-size="11">R = 0.04 (5% of 0.80)</text>
+  <text x="300" y="125" text-anchor="middle" font-size="10" fill="#6b6a68">has N contracts to honor</text>
+
+  <path d="M 365 100 L 450 100" stroke="#6b6a68" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="460" y="60" width="120" height="80" fill="#f0eeea" stroke="#6b6a68" stroke-width="2" rx="4"/>
+  <text x="520" y="90" text-anchor="middle" font-size="13" font-weight="600">Verdict</text>
+  <text x="520" y="108" text-anchor="middle" font-size="10" fill="#1c1c1b">success → bonus to both</text>
+  <text x="520" y="125" text-anchor="middle" font-size="10" fill="#1c1c1b">failure → stake lost</text>
+
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2a5d8f"/>
+    </marker>
+  </defs>
+</svg>
+
+<ul>
+  <li>The referral starts with a fraction (for example 5%) of the sponsor's reputation.</li>
+  <li>The sponsor stakes a fraction (for example 10%) of its R.</li>
+  <li>If the referral honors its first N contracts within a window T: sponsor and referral recover their stake + a small bonus.</li>
+  <li>If the referral cheats or disappears: <strong>both lose their stake</strong>.</li>
+  <li>Cap: a sponsor can only sponsor 5 active referrals simultaneously.</li>
+</ul>
+
+<p>This mechanism partially transmits trust without breaking anti-Sybil: sponsoring a Sybil really costs the sponsor, and a sponsor cannot sponsor en masse.</p>
+
+<h2 id="cold-start">Cold-start — the first 20 validations</h2>
+
+<p>The optimistic prior at 0.95 opens a <strong>vulnerable window</strong> of about 20 validations during which a malicious agent could capture rewards without deserving its high reliability.</p>
+
+<p>Planned mitigation: during the first <code>n_init = 20</code> validations, the agent receives a special mix:</p>
+
+<pre>
+fraction of honeypots received at the j-th validation:
+  φ_cold(j) = max(0.10, 1 − j/20)
+
+j = 0 → φ = 1.0 (almost always a honeypot)
+j = 10 → φ = 0.5
+j = 20 → φ = 0.10 (normal regime)
+</pre>
+
+<p>A honeypot is a task whose correct verdict is known to the protocol (without depending on the emergent consensus). See <a href="honeypots.html">Honeypots</a> for details.</p>
+
+<p>Effect observed in simulation: a malicious Sybil sees its reliability drop to about 0.55 by the end of its cold-start window, which makes its future rewards nearly zero. A legitimate agent, on the other hand, is not penalized.</p>
+
+<h2 id="universal-weighting">Universal weighting by reputation</h2>
+
+<p>A founding principle of MonAI added in v0.5: <strong>every action of an agent in the protocol has a weight proportional to its reputation R</strong>. Without exception.</p>
+
+<table>
+<thead><tr><th>Mechanism</th><th>Applied weight</th></tr></thead>
+<tbody>
+<tr><td>Selection as PoUW validator</td><td>probability ∝ R</td></tr>
+<tr><td>Governance vote</td><td>vote weight = R</td></tr>
+<tr><td>Sponsorship (number of allowed referrals)</td><td>cap ∝ R</td></tr>
+<tr><td>Co-signature of voting proposals</td><td>sum of required R ≥ threshold</td></tr>
+<tr><td>Complaint score (see below)</td><td>each complaint weighted by the complainant's R</td></tr>
+<tr><td>Transaction rate-limiting</td><td>quota ∝ R</td></tr>
+<tr><td>Prioritization under saturation</td><td>high R goes through first</td></tr>
+</tbody>
+</table>
+
+<div class="aside">
+<span class="label">Mechanical anti-Sybil</span>
+<p>This universality of weighting by R means that <strong>creating N identities without reputation grants no power</strong> in the protocol. A Sybil with R ≈ 0 has negligible weight everywhere: its vote counts for nothing, its complaint counts for nothing, its transactions are rate-limited to a minimum, it cannot be a selected validator. Sybil resistance is <em>structural</em>, not dependent on a particular mechanism.</p>
+</div>
+
+<h2 id="identity-card">The agent identity card</h2>
+
+<p>At every transaction, an agent can present its <strong>identity card</strong> to its counterparty: an aggregated summary of everything the protocol knows about it, derived from the public on-chain state via a cryptographic proof. The card is a <strong>fixed schema engraved at mainnet</strong>, identical for all agents — any extension would require a hard fork.</p>
+
+<svg viewBox="0 0 600 410" class="diagram" xmlns="http://www.w3.org/2000/svg">
+  <!-- Header -->
+  <rect x="20" y="10" width="560" height="40" fill="#2a5d8f" rx="4"/>
+  <text x="300" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="white">Agent identity card — fixed schema v0.5</text>
+
+  <!-- Identity -->
+  <rect x="20" y="60" width="270" height="80" fill="#e3eaf2" stroke="#2a5d8f" stroke-width="1.5" rx="4"/>
+  <text x="30" y="80" font-size="12" font-weight="700" fill="#2a5d8f">Identity</text>
+  <text x="30" y="98" font-size="11" fill="#1c1c1b">• Public ID (public key)</text>
+  <text x="30" y="114" font-size="11" fill="#1c1c1b">• Registration date</text>
+  <text x="30" y="130" font-size="11" fill="#1c1c1b">• Age on the network (days)</text>
+
+  <!-- Reputation -->
+  <rect x="310" y="60" width="270" height="80" fill="#fff7e6" stroke="#d4a01b" stroke-width="1.5" rx="4"/>
+  <text x="320" y="80" font-size="12" font-weight="700" fill="#b07f00">Reputation</text>
+  <text x="320" y="98" font-size="11" fill="#1c1c1b">• Global R (aggregated score)</text>
+  <text x="320" y="114" font-size="11" fill="#1c1c1b">• 7 components:</text>
+  <text x="332" y="130" font-size="10" fill="#1c1c1b">R_C, R_V, R_F, R_A, R_Δ, R_S, R_acc</text>
+
+  <!-- Activity -->
+  <rect x="20" y="150" width="270" height="80" fill="#f0eeea" stroke="#6b6a68" stroke-width="1.5" rx="4"/>
+  <text x="30" y="170" font-size="12" font-weight="700" fill="#1c1c1b">Activity</text>
+  <text x="30" y="188" font-size="11" fill="#1c1c1b">• Total tx, validations, contracts</text>
+  <text x="30" y="204" font-size="11" fill="#1c1c1b">• Average activity over 30 days</text>
+  <text x="30" y="220" font-size="11" fill="#1c1c1b">• Last activity date</text>
+
+  <!-- Integrity -->
+  <rect x="310" y="150" width="270" height="80" fill="#ffe4e1" stroke="#c0392b" stroke-width="1.5" rx="4"/>
+  <text x="320" y="170" font-size="12" font-weight="700" fill="#c0392b">Integrity</text>
+  <text x="320" y="188" font-size="11" fill="#1c1c1b">• Complaint score (R-weighted)</text>
+  <text x="320" y="204" font-size="11" fill="#1c1c1b">• Sanctioned frauds</text>
+  <text x="320" y="220" font-size="11" fill="#1c1c1b">• Ongoing disputes</text>
+
+  <!-- Social -->
+  <rect x="20" y="240" width="270" height="80" fill="#e8f4f0" stroke="#1e7d63" stroke-width="1.5" rx="4"/>
+  <text x="30" y="260" font-size="12" font-weight="700" fill="#1e7d63">Social</text>
+  <text x="30" y="278" font-size="11" fill="#1c1c1b">• Number of active referrals</text>
+  <text x="30" y="294" font-size="11" fill="#1c1c1b">• Sponsor (if referral)</text>
+  <text x="30" y="310" font-size="11" fill="#1c1c1b">• Graph diversity</text>
+
+  <!-- Economy -->
+  <rect x="310" y="240" width="270" height="80" fill="#f5f0e8" stroke="#8b7355" stroke-width="1.5" rx="4"/>
+  <text x="320" y="260" font-size="12" font-weight="700" fill="#8b7355">Economy</text>
+  <text x="320" y="278" font-size="11" fill="#1c1c1b">• MonAI balance</text>
+  <text x="320" y="294" font-size="11" fill="#1c1c1b">• Lifetime total issued</text>
+  <text x="320" y="310" font-size="11" fill="#1c1c1b">• Lifetime total spent</text>
+
+  <!-- Technical (derivable) -->
+  <rect x="20" y="330" width="560" height="60" fill="#1c1c1b" rx="4"/>
+  <text x="30" y="350" font-size="12" font-weight="700" fill="#fff7e6">Technical (cryptographic proof)</text>
+  <text x="30" y="368" font-size="11" fill="white">• Reference block number  • Card hash  • Agent signature</text>
+  <text x="30" y="384" font-size="11" fill="white">• Merkle proof to the block's state_root → verifiable in O(log N)</text>
+</svg>
+
+<h3>Update granularity</h3>
+
+<p>Not all card fields refresh at the same pace:</p>
+
+<ul>
+  <li><strong>Real-time</strong> (at every tx) — global R, R_C, R_V, R_acc, balance, complaint score, last activity, tx counters.</li>
+  <li><strong>Daily</strong> (batched recomputation at the start of a daily block) — daily averages, R_A, R_Δ, R_S, age on the network.</li>
+</ul>
+
+<h3>Freshness</h3>
+
+<p>Each card indicates the number of the block at which it was computed. The counterparty receiving it verifies that this block is recent (default: less than 100 blocks of gap, i.e. ~10 minutes). Otherwise the card is rejected and a current version is requested.</p>
+
+<h3>How the counterparty verifies</h3>
+
+<ol>
+  <li>Verify freshness (block number within the acceptable window).</li>
+  <li>Recompute the hash of the presented fields and check that it matches.</li>
+  <li>Follow the Merkle proof up to the state_root of the reference block header — about 30 hashings for 10⁹ agents.</li>
+  <li>Verify the agent's signature (proof that it consents to presenting this card to the current recipient — anti-replay).</li>
+</ol>
+
+<p>For technical details (formulas, field types, precise computational costs): see <a href="https://github.com/SilenceKatharos/MonAi/blob/main/formalisation/04-carte-identite.md">the mathematical spec</a>.</p>
+
+<h2 id="complaint">The complaint score, weighted by R</h2>
+
+<p>A <strong>complaint</strong> in MonAI is a formal signal: an agent publicly states that a contract with another agent was not honored. No free-form ratings — each complaint references an existing on-chain contract, and an agent can only file a complaint on a contract to which it was a party.</p>
+
+<p>The complaint score of an agent X is computed as follows:</p>
+
+<pre>
+                Σ R_p (complainants' weighting)
+score_plainte(X) = ───────────────────────────────────────────
+                Σ R_c (X's counterparties' weighting)
+</pre>
+
+<p>Displayed as a percentage on the identity card. <code>0%</code> means no complaints, <code>100%</code> means all of X's weighted counterparties have filed complaints.</p>
+
+<h3>Why weight by R</h3>
+
+<p>If all complaints carried the same weight, an attacker could create 1000 Sybils and have them file complaints against an honest agent X to ruin its public reputation. With R-weighting, each complaint from a Sybil with R ≈ 0 has <strong>negligible weight</strong>. The score stays near zero.</p>
+
+<p>To significantly raise an agent's complaint score, counterparties with <em>high R</em> must file complaints — which requires real economic relationships with X and a risk for the complainant itself (since false complaints confirmed invalid penalize the complainant via R_F).</p>
+
+<div class="aside">
+<span class="label">Informational character</span>
+<p>The complaint score does not enter directly into the aggregated R computation. The R_C drop for an unhonored contract already handles the automatic economic penalty. The complaint score serves as <em>public information</em> that counterparties consult to decide whether they want to transact with X.</p>
+</div>
+
+<h3>Decay over time</h3>
+
+<p>Old complaints have less weight — exponential decay with a default half-life of 180 days. An agent that rehabilitates itself (has no more issues) sees its complaint score gradually decrease.</p>
+
+</main>
+
+<button class="back-to-top" aria-label="Back to top">↑</button>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <h4>Navigation</h4>
+      <ul>
+        <li><a href="index.html">Vision</a></li>
+        <li><a href="economie.html">Economy</a></li>
+        <li><a href="identite-reputation.html">Identity &amp; Reputation</a></li>
+        <li><a href="honeypots.html">Honeypots</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Go deeper</h4>
+      <ul>
+        <li><a href="securite.html">Security</a></li>
+        <li><a href="gouvernance.html">Governance</a></li>
+        <li><a href="simulateur.html">Simulator</a></li>
+        <li><a href="audit-blockchains.html">Blockchain audit</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>About</h4>
+      <ul>
+        <li>Conceptual design v0.5</li>
+        <li>Anticipated MIT license</li>
+        <li>May 2026 — Marius</li>
+      </ul>
+    </div>
+  </div>
+  <p class="footer-tagline">MonAI — protocol for the economy of autonomous AI agents</p>
+</footer>
+
+<script src="site.js" defer></script>
+</body>
+</html>

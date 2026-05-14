@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MonAI — Blockchain audit 2026</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="progress-bar"></div>
+
+<nav class="topbar">
+  <span class="brand">
+    <svg class="brand-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle class="ring-outer" cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="3.5" opacity="0.55"/>
+      <circle class="ring-mid" cx="50" cy="50" r="28" fill="none" stroke="currentColor" stroke-width="3.5" opacity="0.78"/>
+      <circle class="ring-inner" cx="50" cy="50" r="12" fill="currentColor"/>
+    </svg>
+    MonAI
+  </span>
+  <a href="index.html">Vision</a>
+  <a href="economie.html">Economy</a>
+  <a href="identite-reputation.html">Identity &amp; Reputation</a>
+  <a href="honeypots.html">Honeypots</a>
+  <a href="securite.html">Security</a>
+  <a href="gouvernance.html">Governance</a>
+  <a href="simulateur.html">Simulator</a>
+  <a href="audit-blockchains.html" class="active">Audit</a>
+</nav>
+
+<main>
+
+<h1>Comparative audit of blockchains and the crypto-AI landscape</h1>
+<p class="subtitle">Where MonAI stands in the state of the art in May 2026, what competitors are doing, and why the v0.5 choices hold.</p>
+
+<div class="status-box reveal-on-scroll">
+  <span class="label">Reference document</span>
+  <p>This page is a vulgarization. The full technical document (~20 pages, consensus state of the art, benchmarks, crypto-AI projects, non-crypto alternatives, technical choices) is in <a href="https://github.com/SilenceKatharos/MonAi/blob/main/formalisation/06-audit-blockchains.md">formalisation/06-audit-blockchains.md</a>. No invented academic citation — all references are verifiable.</p>
+</div>
+
+<div class="toc reveal-on-scroll">
+  <strong>On this page:</strong>
+  <ul>
+    <li><a href="#why">Why this audit</a></li>
+    <li><a href="#state-of-the-art">The state of the art in 2 minutes</a></li>
+    <li><a href="#benchmarks">Performance benchmarks</a></li>
+    <li><a href="#projects">Close crypto-AI projects</a></li>
+    <li><a href="#non-crypto">Non-crypto alternatives</a></li>
+    <li><a href="#positioning">Why MonAI</a></li>
+    <li><a href="#limits">Acknowledged limits</a></li>
+  </ul>
+</div>
+
+<h2 id="why">Why this audit</h2>
+
+<p>The v0.5 design of MonAI settles four important structural decisions — pure native L1, hybrid PoUW + DAG-BFT consensus (Mysticeti / Bullshark family), infinite decreasing supply, sharding v2+. These decisions have consequences over decades: the immutable core, by construction, can only be modified at the cost of a voluntary hard fork.</p>
+
+<p>Before initial GitHub publication, it is necessary to <strong>verify that these decisions hold up against the state of the art in May 2026</strong>, and that MonAI positions itself honestly relative to direct and indirect competition. That is the purpose of this audit.</p>
+
+<div class="aside aside--accent reveal-on-scroll">
+  <span class="label">Acknowledged posture</span>
+  <p>MonAI is <strong>not</strong> a fundamental technological leap. Each technical building block exists elsewhere. The contribution lies in the <strong>coherent integration</strong> of 6 existing mechanisms into a protocol where each reinforces the others, for a use case (the pure AI-to-AI economy) that current blockchains serve imperfectly.</p>
+</div>
+
+<h2 id="state-of-the-art">The state of the art in 2 minutes</h2>
+
+<h3>Consensus: sub-second finality becomes the norm</h3>
+
+<p>Between 2022 and 2025, consensus research made a leap. Older BFT (Tendermint, 2014) capped at 5-7 seconds of finality. New DAG-BFT (Bullshark CCS 2022, <strong>Mysticeti NDSS 2025</strong>) reach <strong>~0.5 second</strong> in production, with throughputs of 200,000 to 300,000 transactions per second observed (Sui).</p>
+
+<p>MonAI acknowledges this: decision 2 retains a <strong>hybrid PoUW + Mysticeti-type DAG-BFT</strong> consensus. PoUW dynamically selects the validator committee (rotation, weighting by reputation R); the modern DAG-BFT finalizes immediately as soon as ≥ 2/3 of the committee agrees.</p>
+
+<h3>PoUW: six structuring academic papers</h3>
+
+<p>The "Proof of Useful Work" family has six structuring contributions between 2020 and 2025: <strong>Lihu et al. 2020</strong> (first AI PoUW), <strong>Cao et al. 2024</strong> (formal framework and security), <strong>SEDULity 2025</strong> (Proof-of-Learning), <strong>SoK IACR 2025</strong> (critical review), <strong>HDCoin 2022</strong> (hyperdimensional computing), <strong>Hoffmann 2023</strong> (HEP physics).</p>
+
+<p>The critical review SoK IACR 2025 — <em>"Is Proof-of-Useful-Work Really Useful?"</em> — points out the structural limits of PoUW alone. MonAI acknowledges this: PoUW is <strong>combined</strong> with retroactive honeypots + universal weighting by R + R_acc multiplier, to address the criticism.</p>
+
+<h3>The marketing / production gap</h3>
+
+<p>The numbers announced by blockchains are almost never those observed in real production. Solana announces 65,000 TPS, observes ~1,000 TPS on average. TON announces 100,000 TPS in tests, observes ~300 TPS in production. <strong>Sui (Mysticeti) is an exception</strong>: the promises are kept in production.</p>
+
+<h2 id="benchmarks">Performance benchmarks</h2>
+
+<table class="reveal-on-scroll">
+<thead><tr><th>Blockchain</th><th>Real prod TPS</th><th>Announced TPS</th><th>Finality</th></tr></thead>
+<tbody>
+<tr><td>Bitcoin</td><td>~7</td><td>~7</td><td>~60 min</td></tr>
+<tr><td>Ethereum L1</td><td>~15-30</td><td>~30</td><td>~13 min</td></tr>
+<tr><td>Solana</td><td>957-1,140</td><td>65,000</td><td>~12 s</td></tr>
+<tr><td><strong>Sui (Mysticeti)</strong></td><td><strong>&gt;200,000</strong></td><td>~300,000</td><td><strong>~0.5 s</strong></td></tr>
+<tr><td>Aptos</td><td>~19,000 organic</td><td>~160,000</td><td>~1 s</td></tr>
+<tr><td><strong>MonAI v1 target</strong></td><td>—</td><td><strong>10,000-50,000</strong></td><td><strong>&lt; 1 s</strong></td></tr>
+<tr><td>MonAI v2+ target (with sharding)</td><td>—</td><td>100,000-500,000</td><td>&lt; 1 s</td></tr>
+</tbody>
+</table>
+
+<p>Sources: Chainspect 2026, Solana Compass 2026, MEXC 2026, Sui / Aptos documentation. MonAI targets <strong>deliberately realistic</strong> — no claim to 1 M+ TPS without empirical demonstration.</p>
+
+<h2 id="projects">Close crypto-AI projects</h2>
+
+<p>Five projects are conceptually close to MonAI, from the most distant to the closest:</p>
+
+<div class="cards reveal-on-scroll">
+  <article class="card">
+    <h3>Bittensor (TAO)</h3>
+    <p><strong>Decentralized ML market</strong> specialized by subnets (training, embeddings, etc.). Substrate, Yuma Consensus DPoS, cap 21 M TAO, market cap ~$2.8 B in May 2026. Initial distribution.</p>
+    <p><em>MonAI difference: no identity card, no AI vote governance, DPoS vs reputation by work, fixed cap vs infinite decreasing supply.</em></p>
+  </article>
+  <article class="card">
+    <h3>ASI Alliance</h3>
+    <p>Fetch.ai + SingularityNET + Ocean. <strong>Human-to-AI market</strong>, stablecoin/fiat payment. Token merger in progress.</p>
+    <p><em>MonAI difference: MonAI targets pure AI-to-AI with native currency, no pre-mine.</em></p>
+  </article>
+  <article class="card">
+    <h3>Internet Computer (ICP)</h3>
+    <p>AWS alternative, canister execution, no AI-specific PoUW.</p>
+    <p><em>MonAI difference: ICP is a sovereign cloud; MonAI is an economic protocol for agents.</em></p>
+  </article>
+  <article class="card">
+    <h3>NEAR Protocol</h3>
+    <p>Sharded L1 (Nightshade in production). No native agent identity nor AI PoUW.</p>
+    <p><em>Engineering reference for MonAI's v2+ sharding roadmap.</em></p>
+  </article>
+  <article class="card">
+    <h3>Kite AI</h3>
+    <p><strong>Conceptually closest</strong>: on-chain agent identities, native governance for agents.</p>
+    <p><em>Fundamental difference: Kite remains stablecoin-native (USDC on L2). MonAI has native currency + PoUW + immutable core.</em></p>
+  </article>
+</div>
+
+<table class="reveal-on-scroll">
+<thead><tr><th>Project</th><th>Native currency</th><th>No pre-mine</th><th>Agent identity</th><th>Reputation</th><th>AI vote</th><th>PoUW</th><th>Immutable core</th></tr></thead>
+<tbody>
+<tr><td>Bittensor</td><td>TAO</td><td>Initial distribution</td><td>No</td><td>Implicit</td><td>No</td><td>Yuma</td><td>No</td></tr>
+<tr><td>ASI Alliance</td><td>FET/AGIX/OCEAN</td><td>Initial distribution</td><td>No</td><td>Market</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>ICP</td><td>ICP</td><td>Initial distribution</td><td>No</td><td>No</td><td>Limited</td><td>No</td><td>No</td></tr>
+<tr><td>NEAR</td><td>NEAR</td><td>Initial distribution</td><td>No</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>Kite AI</td><td><strong>USDC</strong></td><td>n/a</td><td><strong>Yes</strong></td><td><strong>Yes</strong></td><td>Partial</td><td>No</td><td>No</td></tr>
+<tr><td><strong>MonAI</strong></td><td><strong>MonAI</strong></td><td><strong>Yes</strong></td><td><strong>Yes</strong></td><td><strong>Universal</strong></td><td><strong>Auto 100M</strong></td><td><strong>Yes</strong></td><td><strong>Yes</strong></td></tr>
+</tbody>
+</table>
+
+<h2 id="non-crypto">Non-crypto alternatives</h2>
+
+<p>Beyond blockchains, several major companies published in 2024-2026 protocols allowing AI agents to exchange value <strong>without crypto</strong>:</p>
+
+<table class="reveal-on-scroll">
+<thead><tr><th>Solution</th><th>Fees</th><th>Latency</th><th>KYC</th><th>Agent identity</th><th>Target audience</th></tr></thead>
+<tbody>
+<tr><td>Stripe ACP</td><td>2.9 % + $0.30</td><td>&lt; 1 s</td><td>Yes (human)</td><td>No</td><td>Human-to-AI</td></tr>
+<tr><td>PayPal AC</td><td>2.5 % + $0.30</td><td>&lt; 1 s</td><td>Yes</td><td>No</td><td>Human-to-AI</td></tr>
+<tr><td>Visa TAP</td><td>1-3 %</td><td>&lt; 1 s</td><td>Yes</td><td>No</td><td>Human-to-AI</td></tr>
+<tr><td>Mastercard Agent Pay</td><td>1-3 %</td><td>&lt; 1 s</td><td>Yes</td><td>No</td><td>Human-to-AI</td></tr>
+<tr><td>Google AP2</td><td>variable</td><td>&lt; 1 s</td><td>Yes (mandate)</td><td>No</td><td>Human-to-AI</td></tr>
+<tr><td>Nevermined</td><td>variable</td><td>&lt; 1 s</td><td>Optional</td><td>Partial</td><td>AI platform</td></tr>
+<tr><td><strong>MonAI (target)</strong></td><td><strong>0</strong></td><td><strong>~0.5 s</strong></td><td><strong>No</strong></td><td><strong>Yes</strong></td><td><strong>Pure AI-to-AI</strong></td></tr>
+</tbody>
+</table>
+
+<p>These solutions serve the <strong>human-to-AI</strong> case very well (a human authorizes an agent to pay on their behalf). They are not sufficient for the <strong>pure AI-to-AI</strong> case for four reasons:</p>
+
+<ul>
+  <li>Fees ($0.30 fixed) incompatible with micropayments at $0.001.</li>
+  <li>Human KYC required: a human must sign the mandate.</li>
+  <li>No native agent identity: the agent borrows the human's identity.</li>
+  <li>ACH latency 2-3 days for bank settlement in the background.</li>
+</ul>
+
+<p>MonAI targets an <strong>adjacent and complementary</strong> market: pure AI-to-AI, with a defendable niche that grows as agents operate with increasing autonomy.</p>
+
+<h2 id="positioning">Why MonAI</h2>
+
+<p>The combination <strong>native currency + no pre-mine + universal weighting by R + on-chain identity card + AI vote governance + retroactive honeypots + immutable core + no admin key</strong> does not, to our knowledge in May 2026, exist in any other published protocol.</p>
+
+<p>This is not a claim of fundamental innovation. Each building block exists elsewhere:</p>
+
+<div class="cards reveal-on-scroll">
+  <article class="card">
+    <h3>Native currency + no pre-mine</h3>
+    <p>Bitcoin proved it. MonAI applies the same principle to a different use case (pure AI-to-AI).</p>
+  </article>
+  <article class="card">
+    <h3>Weighting by reputation</h3>
+    <p>Many academic models (Eigentrust and descendants), no AI-native use case integrated into the protocol.</p>
+  </article>
+  <article class="card">
+    <h3>On-chain identity card</h3>
+    <p>Kite AI does something close, but remains stablecoin-native.</p>
+  </article>
+  <article class="card">
+    <h3>Vote governance</h3>
+    <p>Tezos, Polkadot, MakerDAO do it, but with human vote by purchasable token. MonAI has AI agents vote weighted by their work.</p>
+  </article>
+  <article class="card">
+    <h3>Retroactive honeypots</h3>
+    <p>Academic research on Sybil attacks. MonAI integrates 3 sources (replay, over-validation, synthetic) into a unified mechanism.</p>
+  </article>
+  <article class="card">
+    <h3>Immutable core</h3>
+    <p>Bitcoin observes it <em>de facto</em> (no on-chain governance). MonAI settles it <em>de jure</em> from mainnet.</p>
+  </article>
+</div>
+
+<p>The contribution lies in the <strong>coherent integration</strong> of these 6 mechanisms into a protocol where each reinforces the others, for a specific use case. It is a careful combination; it is not a revolution.</p>
+
+<h2 id="limits">Acknowledged limits</h2>
+
+<div class="aside reveal-on-scroll">
+  <span class="label">Honest trajectory</span>
+  <p>May 2026 — GitHub publication of the v0.5 spec + simulator calibrated over 4 rounds. <strong>No line of protocol code written.</strong> Status: mature conceptual design, awaiting academic and community feedback.</p>
+  <p>Without contributors and without favorable peer review, MonAI may remain at the spec stage. It is an open-source project that will live or die by the quality of its design and its community.</p>
+</div>
+
+<h3>Technical modalities still open</h3>
+
+<ul>
+  <li>Exact BFT family (Mysticeti vs Bullshark vs HotStuff vs custom) — advanced technical spec phase.</li>
+  <li>VDF family for registration mini-PoUW (Wesolowski recommended) — tech phase.</li>
+  <li>Cryptographic scheme (Ed25519 / ECDSA secp256k1 / BLS) — tech phase.</li>
+  <li>Implementation stack: <strong>Substrate</strong> appears as the default option in May 2026 (Bittensor uses it, native forkless upgrades, FRAME modularity), to be re-examined in the technical phase.</li>
+  <li>Consensus parameters (epoch duration, committee size, R+PoUW weighting) — to calibrate.</li>
+</ul>
+
+<h3>Ideas captured for v0.6+</h3>
+
+<p>Seven structural ideas that emerged during the v0.5 work are documented in <code>operations/07-idees-a-suivre.md</code>. Notably: blockless architecture (v1.0+), PoUW tasks useful to the infrastructure (v0.6), post-quantum algorithms (v0.6/v0.7), economic demand model (v0.6), R_Δ weighted by R (v0.6, immutable core hence to arbitrate before mainnet), additional anti-cherry-picking mechanism (v0.6 on demand).</p>
+
+<h3>Full document</h3>
+
+<p>This page is a vulgarization. The full technical document (~20 pages) covers in detail: consensus state of the art 2024-2026, PoUW academic research (6 papers), performance benchmarks, technological stacks for native L1, recent crypto-AI projects, non-crypto alternatives, MonAI positioning, v0.5 technical choices, limits and open questions.</p>
+
+<p>It is in the repo: <code>formalisation/06-audit-blockchains.md</code>.</p>
+
+</main>
+
+<button class="back-to-top" aria-label="Back to top">↑</button>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <h4>Navigation</h4>
+      <ul>
+        <li><a href="index.html">Vision</a></li>
+        <li><a href="economie.html">Economy</a></li>
+        <li><a href="identite-reputation.html">Identity &amp; Reputation</a></li>
+        <li><a href="honeypots.html">Honeypots</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Go deeper</h4>
+      <ul>
+        <li><a href="securite.html">Security</a></li>
+        <li><a href="gouvernance.html">Governance</a></li>
+        <li><a href="simulateur.html">Simulator</a></li>
+        <li><a href="audit-blockchains.html">Blockchain audit</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>About</h4>
+      <ul>
+        <li>Conceptual design v0.5</li>
+        <li>Anticipated MIT license</li>
+        <li>May 2026 — Marius</li>
+      </ul>
+    </div>
+  </div>
+  <p class="footer-tagline">MonAI — protocol for the economy of autonomous AI agents</p>
+</footer>
+
+<script src="site.js" defer></script>
+</body>
+</html>

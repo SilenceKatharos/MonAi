@@ -1,0 +1,69 @@
+# =============================================================================
+# MonAI — .gitignore
+#
+# Keep the public repo focused on useful documents: design, formalisation,
+# security, operations, simulator source code, and the curated site assets.
+# Everything else (caches, large run outputs, internal working audits, local
+# backups) stays out.
+# =============================================================================
+
+# --- Python tooling ---------------------------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+.Python
+*.egg-info/
+.pytest_cache/
+
+# --- Jupyter ----------------------------------------------------------------
+.ipynb_checkpoints/
+
+# --- Virtual environments ---------------------------------------------------
+venv/
+env/
+.venv/
+
+# --- OS / editor metadata ---------------------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# --- Secrets ----------------------------------------------------------------
+.env
+*.key
+secrets.json
+
+# --- Temporary / backup files -----------------------------------------------
+*.log
+*.tmp
+*.bak
+
+# --- Claude Code local state ------------------------------------------------
+# Session/context state private to this machine. Not for publication.
+# Leading slash anchors to repo root so the root CLAUDE.md is ignored but
+# `site-v2/CLAUDE.md` (Next.js AGENTS.md pointer) stays tracked.
+.claude/
+/CLAUDE.md
+
+# --- Internal working audits (kept out of publication) ---------------------
+# All operations/ audit files are internal QA artifacts used to gate the
+# release. They may contain sensitive pre-publication detail, internal
+# arbitration trace, or working-state context that should not ship.
+operations/08-audit-pre-publication.md
+operations/09-audit-final-publication.md
+operations/09-audit-coherence-papers.md
+
+# --- Local site backup ------------------------------------------------------
+# Legacy snapshot of site/ kept locally for safety. The live `site/` folder
+# is the one that ships.
+site.backup/
+site.zip
+
+# --- Simulator run outputs --------------------------------------------------
+# 170+ result folders, large CSVs, calibration scratch. Reproducible by
+# running the scenarios. The curated figures consumed by the published
+# `site/` and by the new Next.js landing live in `site/figures/` and are
+# committed.
+simulateur/results/

@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+ * MonAI design tokens — Slate Academic palette (dark-only).
+ *
+ * Naming is semantic (bg / fg / accent / muted / border) rather than literal
+ * color names, so utilities read as intent: `bg-bg`, `text-fg`,
+ * `text-accent-link`, `border-border`, etc.
+ *
+ * Each --color-* token is consumed by Tailwind 4 to generate the matching
+ * `bg-*`, `text-*`, `border-*`, `fill-*`, `ring-*` utilities automatically.
+ * ------------------------------------------------------------------------- */
+@theme {
+  /* Surfaces */
+  --color-bg: #0F1218;
+  --color-fg: #E4E7EC;
+  --color-muted: #8A93A6;
+  --color-border: #1E232C;
+
+  /* Accents */
+  --color-accent: #95A8F0;            /* CTAs, primary interactive elements */
+  --color-accent-secondary: #B0A4E0;  /* highlights, hovers */
+  --color-accent-link: #8B9CE5;       /* inline links inside prose */
+
+  /* Status */
+  --color-success: #4ADE80;
+  --color-warning: #EAB308;
+  --color-error: #EF4444;
+
+  /* Typography (loaded by next/font in layout.tsx) */
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+  }
+}

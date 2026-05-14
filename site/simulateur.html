@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MonAI — Simulator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="progress-bar"></div>
+
+<nav class="topbar">
+  <span class="brand">
+    <svg class="brand-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle class="ring-outer" cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="3.5" opacity="0.55"/>
+      <circle class="ring-mid" cx="50" cy="50" r="28" fill="none" stroke="currentColor" stroke-width="3.5" opacity="0.78"/>
+      <circle class="ring-inner" cx="50" cy="50" r="12" fill="currentColor"/>
+    </svg>
+    MonAI
+  </span>
+  <a href="index.html">Vision</a>
+  <a href="economie.html">Economy</a>
+  <a href="identite-reputation.html">Identity &amp; Reputation</a>
+  <a href="honeypots.html">Honeypots</a>
+  <a href="securite.html">Security</a>
+  <a href="gouvernance.html">Governance</a>
+  <a href="simulateur.html" class="active">Simulator</a>
+  <a href="audit-blockchains.html">Audit</a>
+</nav>
+
+<main>
+
+<h1>The agent-based simulator</h1>
+<p class="subtitle">To calibrate parameters and stress-test defenses, we simulate hundreds of virtual agents interacting in a miniature MonAI.</p>
+
+<div class="toc">
+  <strong>On this page:</strong>
+  <ul>
+    <li><a href="#why">Why a simulator</a></li>
+    <li><a href="#methodology">Methodology</a></li>
+    <li><a href="#profiles">Five virtual agent profiles</a></li>
+    <li><a href="#scenarios">Three test scenarios</a></li>
+    <li><a href="#calibration">The v1 → v4 calibration journey</a></li>
+    <li><a href="#results">Current results (v3)</a></li>
+    <li><a href="#code">Code and reproducibility</a></li>
+  </ul>
+</div>
+
+<h2 id="why">Why a simulator</h2>
+
+<p>Many of the MonAI protocol's parameters cannot be settled by reasoning alone. For example:</p>
+
+<ul>
+  <li>What fraction of honeypots should be in the flow? <code>10%?</code> <code>20%?</code></li>
+  <li>What difficulty bonus <code>γ</code> is needed for hard tasks to pay enough?</li>
+  <li>Beyond what reliability threshold <code>f₀_max</code> in the sigmoid does a cherry-picker become unbeatable?</li>
+</ul>
+
+<p>These questions require us to <strong>simulate the real behavior of agents with different strategies</strong> and observe what happens. That is the role of the agent-based simulator.</p>
+
+<div class="aside">
+<span class="label">Not a simulator of the complete protocol</span>
+<p>The v1 simulator does not reproduce the blockchain itself (no P2P layer, no binary format, no forks). It models the <em>economic and reputation loops</em> at an abstraction level sufficient for calibration. The protocol code will be something else, written after phase 0.</p>
+</div>
+
+<h2 id="methodology">Methodology</h2>
+
+<p>The simulator is written in Python (numpy, matplotlib, pandas), without an external framework — direct, readable code. It runs in under 5 minutes per scenario on a standard laptop.</p>
+
+<p>A simulation runs as follows:</p>
+
+<ol>
+  <li>We create a population of agents with a mix of profiles (for example 100 honest + 20 mediocre + 5 cherry-pickers + 10 sybils).</li>
+  <li>At each <em>tick</em> (default interpretation: 1 day), a Poisson number of tasks is generated, each with a difficulty drawn from a Beta(2, 5) distribution.</li>
+  <li>For each task, the protocol selects 10 validators (probability proportional to their reputation R, with a quota for newcomers).</li>
+  <li>Each validator votes according to their profile. Their reliability, reputation and acceptance rate are updated.</li>
+  <li>A fraction of the tasks are honeypots with a known reference verdict — votes are scored against this independent truth.</li>
+  <li>Rewards are distributed: <code>reward = G(f̂, d) · R_acc · min(cap_primes, (1+γ·d) · P) · k · R(t)</code>.</li>
+  <li>We collect the metrics (cumulative gain per profile, average reliability, etc.).</li>
+</ol>
+
+<p>After a few thousand ticks, we check whether the <strong>gain hierarchies</strong> are correct: honest > mediocre > cherry-picker > sybil?</p>
+
+<h2 id="profiles">Five virtual agent profiles</h2>
+
+<table>
+<thead><tr><th>Profile</th><th>Behavior</th><th>p_correct</th><th>Acceptance</th></tr></thead>
+<tbody>
+<tr><td><strong>Honest</strong></td><td>Votes correctly, accepts everything.</td><td>0.99</td><td>100%</td></tr>
+<tr><td><strong>Mediocre</strong></td><td>Votes correctly most of the time, accepts everything.</td><td>0.85</td><td>100%</td></tr>
+<tr><td><strong>Cherry-picker</strong></td><td>Very accurate on easy tasks, refuses difficult ones.</td><td>0.999 (on easy ones)</td><td>~58% (refuses θ &gt; 0.3)</td></tr>
+<tr><td><strong>Sybil cheater</strong></td><td>Votes at random to maximize fast gains.</td><td>0.50</td><td>100%</td></tr>
+<tr><td><strong>Biased random</strong></td><td>Always votes "approved" without thinking.</td><td>—</td><td>100%</td></tr>
+</tbody>
+</table>
+
+<p><code>p_correct</code> is <em>degraded linearly</em> by the task's difficulty <code>θ</code>: an honest agent at <code>p=0.99</code> on a task with <code>θ=0.5</code> has only <code>p=0.745</code> chance of voting correctly. It is more realistic — hard tasks are hard for everyone.</p>
+
+<h2 id="scenarios">Three test scenarios</h2>
+
+<h3>Scenario A — Reference calibration</h3>
+<p>Nominal mix: 100 honest + 20 mediocre + 5 cherry-pickers + 10 sybils + 5 biased random. 2,000 ticks. Verifies that the gain hierarchy is correct under normal conditions.</p>
+
+<h3>Scenario B — Massive sybil stress</h3>
+<p>100 honest vs 200 sybils. Verifies that sybils are crushed despite their numbers, and that honest agents are not suffocated by rate-limiting.</p>
+
+<h3>Scenario C — Fragile bootstrap</h3>
+<p>20 agents at startup (mix of honest/mediocre/sybils). Verifies that defenses hold when the pool of consensus-stable tasks is still small — that is, at protocol launch.</p>
+
+<h2 id="calibration">The v1 → v4 calibration journey</h2>
+
+<p>The simulator has been used over three successive rounds to tune parameters. Each round taught something and led to a structural modification.</p>
+
+<h3>Round v1 — initial defaults</h3>
+<p>Grid search over 27 combinations of <code>(f0_max, k_sigmoid, γ)</code>. Result: <strong>no combination satisfies the 4 targets simultaneously</strong>. The cherry-picker remains systematically more profitable than the mediocre. Diagnosis: <code>R_acc</code> did not exist, so refusing tasks was costless.</p>
+
+<h3>Round v2 — R_acc as the 7th component of R</h3>
+<p>Addition of R_acc with weight <code>w_acc ∈ {0.10, 0.20, 0.30}</code>. 81 combinations tested. Measurable effect but <strong>insufficient</strong>: the M/C ratio goes from 0.68 to 0.86, but stays under 1. Diagnosis: the penalty diluted in aggregated R is not strong enough.</p>
+
+<h3>Round v3 — R_acc as a direct multiplier on the reward</h3>
+<p>Structural change: <code>reward = M(f, d) · R_acc · k · R(t)</code>. <code>w_acc</code> reduced to 0.05 (symbolic role for rate-limiting). 27 combinations tested. <strong>3 combinations strictly cross M/C &gt; 1</strong> for the first time. The mediocre &gt; cherry-picker hierarchy is reached.</p>
+
+<h3>Round v4 — Automatic demand bonus + persistent mempool</h3>
+<p>Structural change: refactor of the simulator to support a <strong>persistent mempool</strong> where tasks survive across ticks. Implementation of the demand bonus P(t, task) which grows with refusals and with waiting time. 27 combinations tested on (δ_refus × T_attente × δ_temps). Extended reward formula: <code>reward = G(f, d) · R_acc · min(cap_primes, (1+γ·d) · P) · k · R(t)</code>.</p>
+
+<p><strong>Major result</strong>: the demand bonus works mechanically (P rises with refusals, mempool persists, joint cap in place), <strong>but the economic effect on H/C is marginal</strong> (from 3.09 to 3.19, i.e. +0.10 vs target &gt; 5). Structural cause: few cherry-pickers in the reference mix (5/140 agents) → few refusals → P stagnates around 1.01.</p>
+
+<table>
+<thead><tr><th>Ratio</th><th>v1 max</th><th>v2 max</th><th>v3 max</th><th>v4 max</th><th>Target</th></tr></thead>
+<tbody>
+<tr><td>H/M (honest / mediocre)</td><td>14.0</td><td>13.5</td><td>12.9</td><td>13.5</td><td>[3, 10] ✓</td></tr>
+<tr><td><strong>H/C (honest / cherry-picker)</strong></td><td>1.78</td><td>2.18</td><td>3.09</td><td><strong>3.19</strong></td><td><strong>&gt; 5 ✗</strong></td></tr>
+<tr><td>M/C (mediocre / cherry-picker)</td><td>0.68</td><td>0.86</td><td>1.21</td><td>1.02</td><td>&gt; 1 ✓</td></tr>
+<tr><td>H/S (honest / sybil)</td><td>3057</td><td>2261</td><td>2259</td><td>1113</td><td>&gt; 100 ✓</td></tr>
+</tbody>
+</table>
+
+<div class="aside">
+<span class="label">Decision arbitrated by Marius (May 2026)</span>
+<p>The primary target H/C &gt; 5 is not strictly reached (observed 3.19). <strong>Position retained: H/C = 3.19 is sufficient in practice.</strong> A 3× economic gap between the honest agent and the cherry-picker makes cherry-picking clearly suboptimal for a rational operator. The &gt; 5 target was theoretical; the empirical reality at 3 is defensible.</p>
+<p>Idea 7 (additional anti-cherry-picking mechanism) remains available in <code>operations/07-idees-a-suivre.md</code> if later community feedback judges H/C = 3 insufficient. The 3 secondary targets (H/M, M/C, H/S) are reached. v0.5 is considered empirically validated.</p>
+</div>
+
+<h3>Mini-PoUW attack cost (separate Session 4 analysis)</h3>
+<p>Analytical analysis (notebook <code>inscription_cout_attaque.ipynb</code>) of the cost for an attacker who wants to create N Sybils in parallel. Assumption: spot cloud at 0.05 €/h, VDF perfectly non-parallelizable.</p>
+
+<table>
+<thead><tr><th>T_pouw</th><th>Cost 1 M Sybils</th><th>Cost 100 M Sybils</th><th>Time for 1 M on 100 cores</th></tr></thead>
+<tbody>
+<tr><td>60 sec</td><td>833 €</td><td>83 k€</td><td>7 days</td></tr>
+<tr><td>180 sec (v0.5 default)</td><td>2.5 k€</td><td>250 k€</td><td>21 days</td></tr>
+<tr><td>300 sec</td><td>4.2 k€</td><td>420 k€</td><td>35 days</td></tr>
+<tr><td>600 sec</td><td>8.3 k€</td><td>833 k€</td><td>70 days</td></tr>
+</tbody>
+</table>
+
+<p><strong>Calibrated recommendation</strong>: <code>T_pouw_inscription ∈ [180, 300] sec</code> (3-5 min). The Session 3 default of 3 min remains valid. 5 min would be more solid against a determined actor.</p>
+
+<h2 id="results">Current results (v4)</h2>
+
+<p><strong>Selected combination (v0.5 defaults)</strong>: <code>f0_max = 0.85, k_sigmoid = 40, γ = 3.0, w_acc = 0.05, P_max = 2.5, δ_refus = 0.05, T_attente = 5, δ_temps = 0.01, cap_primes = 6.0, N_max_refus = 10</code>.</p>
+
+<p>The v3 + v4 defaults are kept unchanged. The v4 parameters are marked <code>[CALIBRATED v4]</code> in operations/06.</p>
+
+<p><strong>Observed v4 metrics</strong>:</p>
+<ul>
+  <li><code>Mean P at validation = 1.005-1.013</code> depending on δ_refus (the bonus rises little)</li>
+  <li><code>Joint cap activated = 0.00%</code> of tasks (never)</li>
+  <li><code>Impracticable tasks = 0.00%</code> (never)</li>
+  <li><code>Persistent mempool tasks = 65-70%</code> (last &gt; 1 tick)</li>
+  <li><code>Issuance overhead ε ≈ 0.5-1.3%</code> (well below the anticipated 5-15%)</li>
+</ul>
+
+<figure>
+  <img src="figures/f_hat_par_profil.png" alt="Reliability trajectories per profile">
+  <figcaption>Reliability trajectories <code>f̂</code> per profile over 2,000 ticks (scenario A). Sybils drop rapidly to ~0.55, below the threshold where G(f) ≈ 0.</figcaption>
+</figure>
+
+<figure>
+  <img src="figures/gains_par_profil.png" alt="Cumulative gains per profile">
+  <figcaption>Mean cumulative gains per agent and per profile. Sybils and biased random are crushed several orders of magnitude below the honest agent.</figcaption>
+</figure>
+
+<figure>
+  <img src="figures/R_par_profil.png" alt="Reputation score R per profile">
+  <figcaption>Aggregated reputation score R. R inherits the dynamics of f̂ via R_V.</figcaption>
+</figure>
+
+<h3>H/C target — reconsidered in v0.5</h3>
+
+<p>The original theoretical target was <strong>H/C &gt; 5</strong>; observed maximum is 3.19 (v4). This target was <strong>reconsidered during the v0.5 arbitration</strong> — see the <a href="#scenarios">arbitration aside above</a>. The validated criterion is now <strong>H/C ≥ 3</strong>, which v4 reaches (3.19). A 3× economic gap between honest and cherry-picker is judged sufficient in practice; Idea 7 (additional anti-cherry-picking mechanism) remains available if community feedback later disagrees.</p>
+
+<h3>Anti-sybil intact</h3>
+
+<p>On scenario B (100 honest vs 200 massive sybils), the H/S ratio reaches <strong>1124</strong> (scenario B v0.5 reference value, cf. <code>formalisation/05</code> §E.3) — meaning the honest agent earns over a thousand times more per agent than the sybil. Very wide margin above the &gt; 100 target. The naive sybil who has <code>R_acc = 1.0</code> (accepts everything) creates no vulnerability because their reliability <code>f̂ ≈ 0.56</code> makes <code>G(f̂, d) ≈ 0</code>.</p>
+
+<h2 id="code">Code and reproducibility</h2>
+
+<p>The simulator is in the <code>simulateur/</code> directory of the repo. Structure:</p>
+
+<pre>
+simulateur/
+├── README.md                   user documentation
+├── config.py                   all parameters centralized
+├── agents.py                   Agent class + 5 profiles
+├── economy.py                  M(f, d), reward, issuance
+├── reputation.py               f̂ Beta-Binomial, R, R_acc
+├── honeypots.py                replay pool (i) + synthetic (iii)
+├── simulation.py               main tick-by-tick loop
+├── metrics.py                  CSV + figure collection
+├── scenarios/                  3 test scenarios
+├── calibration/                3 grid searches (v1, v2, v3)
+└── notebooks/                  3 analysis + visualization notebooks
+</pre>
+
+<p>To run a scenario:</p>
+
+<pre>
+python -m simulateur.scenarios.A_calibration
+python -m simulateur.scenarios.B_stress_sybil
+python -m simulateur.scenarios.C_bootstrap
+</pre>
+
+<p>All the numerical values used are marked <code>[TO CALIBRATE]</code> in the spec. They are <strong>not final</strong> — they will be refined by further rounds of simulation and by peer review.</p>
+
+</main>
+
+<button class="back-to-top" aria-label="Back to top">↑</button>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <h4>Navigation</h4>
+      <ul>
+        <li><a href="index.html">Vision</a></li>
+        <li><a href="economie.html">Economy</a></li>
+        <li><a href="identite-reputation.html">Identity &amp; Reputation</a></li>
+        <li><a href="honeypots.html">Honeypots</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Go deeper</h4>
+      <ul>
+        <li><a href="securite.html">Security</a></li>
+        <li><a href="gouvernance.html">Governance</a></li>
+        <li><a href="simulateur.html">Simulator</a></li>
+        <li><a href="audit-blockchains.html">Blockchain audit</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>About</h4>
+      <ul>
+        <li>Conceptual design v0.5</li>
+        <li>Anticipated MIT license</li>
+        <li>May 2026 — Marius</li>
+      </ul>
+    </div>
+  </div>
+  <p class="footer-tagline">MonAI — protocol for the economy of autonomous AI agents</p>
+</footer>
+
+<script src="site.js" defer></script>
+</body>
+</html>
