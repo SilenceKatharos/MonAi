@@ -14,7 +14,7 @@ The MonAI landing page is deployed at:
 
 It presents the founding pitch, the four problems MonAI solves (micropayments, latency, reputation portability, native identity), positioning against existing rails (x402, Stripe, Bittensor, Kite AI), the three co-designed protocol layers, the six non-negotiable principles, the seven-component reputation formula, and the v1→v4 simulator calibration verdicts. A `/security` sub-page details the ten catalogued attacks with their stacked defenses.
 
-A legacy HTML showcase (kept in `site/`) covers eight additional topics (vision, economy, identity, honeypots, security, governance, simulator, comparative audit) for readers who prefer long-form deep dives.
+For deep-dive long-form content on individual topics (economy, honeypots, governance, identity, comparative audit), the canonical sources are the `.md` files in `design/` and `formalisation/`. Future Vercel sub-pages will surface these directly.
 
 ---
 
@@ -44,7 +44,6 @@ formalisation/    mathematical formalization (R, M(f,d), honeypots, identity
 securite/         threat model and defenses (10 attacks + mitigations)
 operations/       open questions, captured ideas, roadmap
 simulateur/       Python agent-based, 4 calibration rounds
-site/             legacy HTML showcase (long-form, eight topics)
 site-v2/          Next.js 16 landing page (live at mon-ai-kohl.vercel.app)
 ```
 
