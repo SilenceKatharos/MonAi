@@ -9,10 +9,12 @@ No line of protocol code. Mathematical spec formalized, agent-based simulator ca
 
 ## Website
 
-A vulgarized version of the project is published via GitHub Pages:
-**https://silencekatharos.github.io/MonAI/** *(URL to be confirmed once GitHub Pages is activated)*
+The MonAI landing page is deployed at:
+**https://mon-ai-kohl.vercel.app/**
 
-The site covers 8 topics (vision, economy, identity, honeypots, security, governance, simulator, comparative audit) in a format accessible to a developer who is not a blockchain specialist.
+It presents the founding pitch, the four problems MonAI solves (micropayments, latency, reputation portability, native identity), positioning against existing rails (x402, Stripe, Bittensor, Kite AI), the three co-designed protocol layers, the six non-negotiable principles, the seven-component reputation formula, and the v1→v4 simulator calibration verdicts. A `/security` sub-page details the ten catalogued attacks with their stacked defenses.
+
+A legacy HTML showcase (kept in `site/`) covers eight additional topics (vision, economy, identity, honeypots, security, governance, simulator, comparative audit) for readers who prefer long-form deep dives.
 
 ---
 
@@ -42,12 +44,13 @@ formalisation/    mathematical formalization (R, M(f,d), honeypots, identity
 securite/         threat model and defenses (10 attacks + mitigations)
 operations/       open questions, captured ideas, roadmap
 simulateur/       Python agent-based, 4 calibration rounds
-site/             vulgarized site (HTML/CSS, GitHub Pages)
+site/             legacy HTML showcase (long-form, eight topics)
+site-v2/          Next.js 16 landing page (live at mon-ai-kohl.vercel.app)
 ```
 
 **Recommended first contact**:
 
-1. Read the [pitch on the site](https://silencekatharos.github.io/MonAI/index.html).
+1. Read the [pitch on the site](https://mon-ai-kohl.vercel.app/).
 2. Open [`design/01-vision-et-idee-generale.md`](design/01-vision-et-idee-generale.md) for the long-term vision and founding principles.
 3. Read [`formalisation/05-bilan-v0-5.md`](formalisation/05-bilan-v0-5.md) for progress status.
 4. Read [`formalisation/06-audit-blockchains.md`](formalisation/06-audit-blockchains.md) for positioning vs competition and justified technical choices.
